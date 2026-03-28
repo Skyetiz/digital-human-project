@@ -8,6 +8,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+// 唇形同步
+import { LipSyncController, TEST_SENTENCES, textToPhonemes } from './api/lipSync.js';
+
 
 // ============================================================
 // 配置项 - 可根据实际需求修改
@@ -111,6 +114,9 @@ let currentCharacterIndex = 0;  // 当前角色索引（0:女生, 1:男生）
 let models = [];        // 存储加载的两个模型
 let mixer;              // 动画混合器（用于播放模型动画）
 let currentAction;      // 当前播放的动画
+//唇形同步
+let lipSyncController = null;
+let currentSpeechTimer = null;
 
 // 灯光对象引用（用于后续调整）
 let lights = {
@@ -202,6 +208,12 @@ function init() {
 
   // ---------- 9. 监听窗口大小变化 ----------
   window.addEventListener('resize', onWindowResize);
+
+  // 初始化唇形同步控制器
+  lipSyncController = new LipSyncController({ debugMode: true });
+  
+  // 添加测试按钮（用于演示）
+  addTestButtons();
 
   console.log('✅ 初始化完成');
 }
@@ -415,6 +427,16 @@ function switchToCharacter(index) {
     scene.add(currentModel);                    // 添加到场景
     currentCharacterIndex = index;              // 更新当前索引
     
+    // 初始化唇形同步
+    if (lipSyncController) {
+      const success = lipSyncController.init(currentModel);
+      if (success) {
+        console.log('✅ 唇形同步已初始化');
+      } else {
+        console.warn('⚠️ 模型不支持唇形同步，将使用模拟效果');
+      }
+    }
+
     // 更新UI高亮状态
     document.querySelectorAll('.character-card').forEach((card, i) => {
       if (i === index) {
@@ -439,6 +461,155 @@ function switchToCharacter(index) {
     showNotification('角色加载中，请稍后...', 'info');
   }
 }
+
+
+// 添加测试按钮
+function addTestButtons() {
+  // 创建测试面板
+  const testPanel = document.createElement('div');
+  testPanel.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0,0,0,0.8);
+    padding: 10px;
+    border-radius: 8px;
+    z-index: 100;
+    display: flex;
+    gap: 10px;
+    backdrop-filter: blur(10px);
+  `;
+  
+  // 测试按钮1：模拟说话
+  const testBtn1 = document.createElement('button');
+  testBtn1.textContent = '🎤 测试说话';
+  testBtn1.style.cssText = `
+    padding: 8px 16px;
+    background: #409eff;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+  `;
+  testBtn1.onclick = () => {
+    const randomText = TEST_SENTENCES[Math.floor(Math.random() * TEST_SENTENCES.length)];
+    testLipSync(randomText);
+  };
+  
+  // 测试按钮2：测试麦克风
+  const testBtn2 = document.createElement('button');
+  testBtn2.textContent = '🎙️ 测试麦克风';
+  testBtn2.style.cssText = `
+    padding: 8px 16px;
+    background: #67c23a;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+  `;
+  testBtn2.onclick = () => {
+    testMicrophone();
+  };
+  
+  // 测试按钮3：重置嘴型
+  const resetBtn = document.createElement('button');
+  resetBtn.textContent = '🔄 重置嘴型';
+  resetBtn.style.cssText = `
+    padding: 8px 16px;
+    background: #e6a23c;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+  `;
+  resetBtn.onclick = () => {
+    if (lipSyncController) {
+      lipSyncController.reset();
+      showNotification('嘴型已重置', 'info');
+    }
+  };
+  
+  testPanel.appendChild(testBtn1);
+  testPanel.appendChild(testBtn2);
+  testPanel.appendChild(resetBtn);
+  document.body.appendChild(testPanel);
+}
+
+// 测试唇形同步（模拟说话）
+function testLipSync(text) {
+  if (!lipSyncController) {
+    showNotification('唇形同步未初始化', 'error');
+    return;
+  }
+  
+  // 停止之前的模拟
+  if (currentSpeechTimer) {
+    clearInterval(currentSpeechTimer);
+  }
+  
+  // 添加到聊天框
+  addMessage(`[测试] ${text}`, 'bot');
+  
+  // 方法1：使用简单模拟
+  currentSpeechTimer = lipSyncController.simulateSpeech(text, () => {
+    console.log('模拟说话结束');
+    currentSpeechTimer = null;
+  });
+  
+  // 方法2：使用音素模拟（更真实）
+  // const phonemes = textToPhonemes(text);
+  // lipSyncController.simulatePhonemes(phonemes, () => {
+  //   console.log('音素模拟结束');
+  // });
+  
+  showNotification(`正在说话: ${text}`, 'info');
+}
+
+// 测试麦克风
+async function testMicrophone() {
+  if (!lipSyncController) {
+    showNotification('唇形同步未初始化', 'error');
+    return;
+  }
+  
+  const success = await lipSyncController.startMicrophoneAnalysis((volume) => {
+    // 可选：显示音量指示器
+    const volumeBar = document.querySelector('.volume-bar');
+    if (volumeBar) {
+      volumeBar.style.width = `${volume * 100}%`;
+    }
+  });
+  
+  if (success) {
+    showNotification('麦克风已启动，请说话测试唇形同步', 'info');
+    
+    // 添加停止按钮
+    const stopBtn = document.createElement('button');
+    stopBtn.textContent = '⏹️ 停止麦克风';
+    stopBtn.style.cssText = `
+      position: fixed;
+      bottom: 100px;
+      left: 20px;
+      padding: 8px 16px;
+      background: #f56c6c;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      cursor: pointer;
+      z-index: 100;
+    `;
+    stopBtn.onclick = () => {
+      lipSyncController.stop();
+      stopBtn.remove();
+      showNotification('麦克风已停止', 'info');
+    };
+    document.body.appendChild(stopBtn);
+  } else {
+    showNotification('无法访问麦克风，请检查权限', 'error');
+  }
+}
+
+
 
 /**
  * 设置模型动画

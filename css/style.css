@@ -453,3 +453,70 @@ canvas {
     opacity: 0;
   }
 }
+
+/* 测试按钮面板样式 */
+.test-panel {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 10px;
+  border-radius: 8px;
+  z-index: 100;
+  display: flex;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.test-panel button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.test-panel button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.test-panel button:active {
+  transform: translateY(0);
+}
+
+.btn-speak {
+  background: linear-gradient(135deg, #409eff, #2d6cdf);
+}
+
+.btn-mic {
+  background: linear-gradient(135deg, #67c23a, #529b2e);
+}
+
+.btn-reset {
+  background: linear-gradient(135deg, #e6a23c, #cf9236);
+}
+
+/* 音量指示器增强 */
+.volume-bar {
+  transition: width 0.05s linear;
+}
+
+/* 麦克风状态指示 */
+.mic-active {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
