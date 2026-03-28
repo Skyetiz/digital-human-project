@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D数字人交互系统</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 顶部导航栏 -->
+  <div class="top-bar">
+    <div class="logo">
+      <img src="assets/logo.svg" alt="Logo" onerror="this.style.display='none'">
+      <span>AI数字人</span>
+    </div>
+    <div class="controls-panel">
+      <button class="icon-btn" id="resetViewBtn" aria-label="重置视角" title="重置视角">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+        </svg>
+        <span class="sr-only">重置视角</span>
+      </button>
+      <button class="icon-btn" id="fullscreenBtn" aria-label="全屏模式" title="全屏">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path fill="currentColor" d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+        </svg>
+        <span class="sr-only">全屏模式</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- 左侧角色选择栏 -->
+  <div class="character-sidebar">
+    <div class="character-card active" data-character="0" role="button" tabindex="0" aria-label="选择旗袍女士角色">
+      <div class="avatar-preview">
+        <img src="assets/avatar1.jpg" alt="旗袍女士头像" onerror="this.src='https://via.placeholder.com/48?text=Avatar1'">
+      </div>
+      <div class="character-info">
+        <h4>旗袍女士</h4>
+        <p>优雅知性</p>
+      </div>
+      <div class="status-indicator" aria-label="在线状态"></div>
+    </div>
+    <div class="character-card" data-character="1" role="button" tabindex="0" aria-label="选择商务男士角色">
+      <div class="avatar-preview">
+        <img src="assets/avatar2.jpg" alt="商务男士头像" onerror="this.src='https://via.placeholder.com/48?text=Avatar2'">
+      </div>
+      <div class="character-info">
+        <h4>商务男士</h4>
+        <p>专业干练</p>
+      </div>
+      <div class="status-indicator" aria-label="在线状态"></div>
+    </div>
+  </div>
+
+  <!-- 右侧对话面板 -->
+  <div class="chat-panel">
+    <div class="chat-header">
+      <span>💬 AI对话</span>
+      <button class="clear-chat" aria-label="清空对话">清空</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot">
+        <div class="avatar" aria-hidden="true">🤖</div>
+        <div class="content">你好！我是你的AI数字人助手，有什么可以帮你的吗？</div>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <textarea 
+        id="userInput" 
+        placeholder="输入消息..." 
+        rows="2"
+        aria-label="输入消息"
+      ></textarea>
+      <button id="sendBtn" class="send-btn" aria-label="发送消息">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="audio-controls">
+      <button id="audioToggle" class="audio-btn" aria-label="语音开关">🔊 开启语音</button>
+      <div class="volume-indicator" aria-label="音量指示器">
+        <div class="volume-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部提示 -->
+  <div class="hint-tip">
+    🖱️ 鼠标拖拽旋转视角 | 右键平移 | 滚轮缩放
+  </div>
+
+  <!-- 脚本引入（使用ES Module） -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
