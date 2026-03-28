@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#409eff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2d6cdf;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 背景圆 -->
+  <circle cx="50" cy="50" r="45" fill="url(#grad)" stroke="white" stroke-width="2"/>
+  
+  <!-- AI字母组合 -->
+  <text x="50" y="68" font-family="Arial, sans-serif" font-size="40" font-weight="bold" text-anchor="middle" fill="white">
+    AI
+  </text>
+  
+  <!-- 装饰点 -->
+  <circle cx="70" cy="30" r="3" fill="white" opacity="0.8"/>
+  <circle cx="30" cy="70" r="3" fill="white" opacity="0.8"/>
+</svg>

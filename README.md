@@ -71,6 +71,8 @@ digital-human-project/
 - 现代浏览器 (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)
 - 支持WebGL的显卡
 
+### 启动命令
+
 ```bash
 npx serve
 ```
@@ -116,8 +118,6 @@ json
 }
 ```
 
-
-
 **响应格式**:
 
 json
@@ -136,8 +136,6 @@ json
 }
 ```
 
-
-
 #### 后端实现示例（Node.js/Express）
 
 javascript
@@ -155,7 +153,7 @@ app.post('/api/chat', async (req, res) => {
   try {
     // 调用OpenAI API或其他大模型服务
     const response = await callLLMService(message, characterId, context);
-    
+  
     res.json({
       success: true,
       reply: response.text,
@@ -206,8 +204,6 @@ app.listen(3000, () => {
 });
 ```
 
-
-
 #### 前端集成示例
 
 javascript
@@ -226,22 +222,20 @@ async function sendMessage() {
       currentCharacterIndex,
       { temperature: 0.7 }
     );
-    
+  
     // 显示回复
     addMessage(aiReply, 'bot');
-    
+  
     // 调用TTS播放语音
     await textToSpeech(aiReply, currentCharacterIndex, (volume) => {
       updateLipSync({ intensity: volume }, currentModel);
     });
-    
+  
   } catch (error) {
     console.error('对话失败:', error);
   }
 }
 ```
-
-
 
 ### 2. 语音合成接口集成
 
@@ -271,8 +265,6 @@ json
 }
 ```
 
-
-
 **响应格式**:
 
 json
@@ -286,8 +278,6 @@ json
   "format": "mp3"
 }
 ```
-
-
 
 #### 后端实现示例（Python/FastAPI）
 
@@ -319,9 +309,9 @@ async def text_to_speech(request: TTSRequest):
             0: "zh-CN-XiaoxiaoNeural",  # 女声
             1: "zh-CN-YunxiNeural"       # 男声
         }
-        
+      
         voice = voice_map.get(request.characterId, request.voice)
-        
+      
         # 生成语音
         communicate = edge_tts.Communicate(
             request.text, 
@@ -329,15 +319,15 @@ async def text_to_speech(request: TTSRequest):
             rate=f"{int(request.rate * 100)}+%",
             pitch=f"{int(request.pitch * 100)}+Hz"
         )
-        
+      
         # 保存临时文件
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
             await communicate.save(tmp.name)
             audio_file = tmp.name
-        
+      
         # 分析音量数据
         volume_data = analyze_volume(audio_file)
-        
+      
         return {
             "success": True,
             "audioUrl": f"/audio/{audio_file}",
@@ -345,7 +335,7 @@ async def text_to_speech(request: TTSRequest):
             "volumeData": volume_data,
             "format": "mp3"
         }
-        
+      
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -353,22 +343,20 @@ def analyze_volume(audio_file):
     """分析音频音量强度"""
     import librosa
     y, sr = librosa.load(audio_file)
-    
+  
     # 每100ms采样一次
     hop_length = int(sr * 0.1)
     rms = librosa.feature.rms(y=y, hop_length=hop_length)[0]
-    
+  
     # 归一化到0-1
     rms_normalized = rms / np.max(rms)
-    
+  
     return rms_normalized.tolist()
 
 @app.get("/audio/{filename}")
 async def get_audio(filename: str):
     return FileResponse(filename, media_type="audio/mpeg")
 ```
-
-
 
 ### 3. 唇形同步模块集成
 
@@ -412,7 +400,7 @@ function switchToCharacter(index) {
   if (models[index]) {
     currentModel = models[index];
     scene.add(currentModel);
-    
+  
     // 初始化唇形同步
     lipSyncController.init(currentModel);
   }
@@ -426,8 +414,6 @@ async function playTTS(text) {
   });
 }
 ```
-
-
 
 ### 4. 完整数据流
 
@@ -445,14 +431,12 @@ text
 [唇形同步模块] → 驱动模型嘴型
 ```
 
-
-
 ## 📝 配置文件说明
 
 ### 模型配置 (CONFIG.models)
 
-| 参数       | 类型    | 说明         | 示例                         |
-| :--------- | :------ | :----------- | :--------------------------- |
+| 参数       | 类型    | 说明         | 示例                           |
+| :--------- | :------ | :----------- | :----------------------------- |
 | path       | string  | 模型文件路径 | `'../models/character1.glb'` |
 | name       | string  | 显示名称     | `'旗袍女士'`                 |
 | scale      | number  | 缩放比例     | `1.0`                        |
@@ -487,7 +471,6 @@ text
    - 模型面向：Z轴正向（面向相机）
    - 单位：米制
    - 坐标原点：脚下中心点
-
 2. **添加Morph Targets（用于唇形同步）**:
 
    text
@@ -499,9 +482,6 @@ text
    4. 创建"jawOpen"、"mouthOpen"等形态键
    5. 调整顶点位置
    ```
-
-   
-
 3. **导出设置**:
 
    - 格式：glTF 2.0 (.glb)
@@ -523,8 +503,6 @@ javascript
 - 格式：JPEG (漫反射) + PNG (透明度)
 - 压缩：使用纹理压缩工具
 ```
-
-
 
 ## 🐛 常见问题
 
@@ -548,8 +526,6 @@ ambient: { intensity: 1.0 },      // 提高环境光
 mainLight: { intensity: 1.5 }     // 提高主光源
 ```
 
-
-
 ### Q3: 女生模型背对相机？
 
 **A**: 已在配置中添加旋转：
@@ -559,8 +535,6 @@ javascript
 ```
 rotation: { y: Math.PI }  // 旋转180度
 ```
-
-
 
 ### Q4: 唇形同步不工作？
 
@@ -573,8 +547,6 @@ javascript
 console.log(currentModel);
 // 检查网格对象的 morphTargetDictionary 属性
 ```
-
-
 
 ### Q5: TTS播放没声音？
 
